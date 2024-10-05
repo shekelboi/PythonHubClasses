@@ -36,12 +36,24 @@ class WeatherRecord:
 
 
 class WeatherResponse:
-    def __init__(self, page: int, per_page: int, name: str, data: [WeatherRecord]):
+    def __init__(self, page: int, per_page: int, name: str, data: [WeatherRecord], min_temp=None, max_temp=None):
         self.page = page
         self.per_page = per_page
-        self.data = [r for r in data if re.search(re.escape(name), r.name, flags=re.IGNORECASE)]
+        self.data = WeatherResponse.filter_data(data, name, min_temp, max_temp)
         self.total = len(self.data)
         self.total_pages = math.ceil(self.total / self.per_page)
+
+    @staticmethod
+    def filter_data(data, name=None, min_temp=None, max_temp=None):
+        print()
+        filtered = []
+        for record in data:
+            print(name)
+            if (name is None or re.search(re.escape(name), record.name, flags=re.IGNORECASE)) and \
+                    (min_temp is None or record.weather >= min_temp) and \
+                    (max_temp is None or record.weather <= max_temp):
+                filtered.append(record)
+        return filtered
 
     def select_page(self, page: int) -> [WeatherRecord]:
         return self.data[(page - 1) * self.per_page:page * self.per_page]
